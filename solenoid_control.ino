@@ -1,54 +1,50 @@
 #include "Servo.h"
 
-/////////////////
-// LauncherFix //
-/////////////////
+/////////////////////////
+// Launchers & Targets //
+/////////////////////////
 
 typedef struct {
   byte pin; // control pin
   byte dly; // delay between high and low signals
-} LauncherFix;
+} Launcher;
 
-LauncherFix launcherFix = {
+Launcher launcher36V = {
   pin: 2,
   dly: 30 // TODO tweak delay
 };
 
-void launchFix() {
-  digitalWrite(launcherFix.pin, HIGH);
-  delay(launcherFix.dly);
-  digitalWrite(launcherFix.pin, LOW);
-}
-
-/////////////////
-// LauncherRot //
-/////////////////
-
-typedef struct {
-  byte pin; // control pin
-  byte dly; // delay between high and low signals
-  byte positions[2]; // roational position array
-} LauncherRot;
-
-//Servo servo; // declare outside of struct because compiler can't handle it:
-// "sorry, unimplemented: non-trivial designated initializers not supported"
-
-LauncherRot launcherRot = {
+Launcher launcher24V = {
   pin: 3,
-  dly: 40, // TODO tweak delay
-  positions: {40, 60} // TODO get real rotations
+  dly: 30 // TODO tweak delay
 };
 
-void launchRot(byte i) {
-  //servo.write(launcherRot.positions[i]);
-  // TODO delay if rotating?
-  digitalWrite(launcherRot.pin, HIGH);
-  delay(launcherRot.dly);
-  digitalWrite(launcherRot.pin, LOW);
+typedef struct {
+  byte target = 0;
+  unsigned int per_target_delay = 100; // TODO tweak delay
+  Servo servo;
+  byte rotations[2] = {20, 40};
+} Targets;
+
+Targets targets;
+
+void aim(byte target) {
+  if (targets.target != target) {
+    targets.servo.write(targets.rotations[target]);
+    delay(targets.per_target_delay * abs(target - targets.target));
+    targets.target = target;
+  }
+}
+
+void launch(Launcher l, byte target) {
+  aim(target);
+  digitalWrite(l.pin, HIGH);
+  delay(l.dly);
+  digitalWrite(l.pin, LOW);
 }
 
 ///////////////////
-// Arduino stuff //
+// Arduino Stuff //
 ///////////////////
 
 void setup() {
@@ -57,9 +53,11 @@ void setup() {
 
   pinMode(LED_BUILTIN, OUTPUT);
   // init launchers
-  pinMode(launcherFix.pin, OUTPUT);
-  pinMode(launcherRot.pin, OUTPUT);
-  //servo.attach(4);
+  pinMode(launcher36V.pin, OUTPUT);
+  pinMode(launcher24V.pin, OUTPUT);
+  // init targets
+  targets.servo.attach(4);
+  aim(0);
 
   blink(3);
 }
@@ -72,11 +70,11 @@ void handleNoteOn(byte channel, byte note, byte velocity) {
   // velocity is ignored
   switch (note) {
     // C1
-    case 24: launchFix(); break;
+    case 24: launch(launcher24V, 0); break;
     // D1
-    case 26: launchRot(0); break;
+    case 26: launch(launcher36V, 0); break;
     // E1
-    case 28: launchRot(1); break;
+    case 28: launch(launcher24V, 1); break;
   }
 }
 
