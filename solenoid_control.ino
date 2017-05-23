@@ -19,25 +19,30 @@ Launcher launcher24V = {
   dly: 30 // TODO tweak delay
 };
 
-typedef struct {
-  byte target = 0;
-  unsigned int per_target_delay = 100; // TODO tweak delay
-  Servo servo;
-  byte rotations[2] = {20, 40};
-} Targets;
+/* TODO real logic:
 
-Targets targets;
+- angle between targets = 25 (about)
+- determine which solenoid to use in order to minimize delay for targeting
+  - also ammunition count for each solenoid
+- per-target delay time
+
+*/
+Servo servo;
+const unsigned int per_target_delay = 50; // TODO tweak delay
+const byte rotations[2] = {20, 45};
+byte last_target = 0;
 
 void aim(byte target) {
-  if (targets.target != target) {
-    targets.servo.write(targets.rotations[target]);
-    delay(targets.per_target_delay * abs(target - targets.target));
-    targets.target = target;
+  if (target != last_target) {
+    servo.write(rotations[target]);
+    delay(per_target_delay * abs(target - last_target));
+    last_target = target;
   }
 }
 
 void launch(Launcher l, byte target) {
   aim(target);
+  //servo.write(rotations[target]);
   digitalWrite(l.pin, HIGH);
   delay(l.dly);
   digitalWrite(l.pin, LOW);
@@ -56,8 +61,8 @@ void setup() {
   pinMode(launcher36V.pin, OUTPUT);
   pinMode(launcher24V.pin, OUTPUT);
   // init targets
-  targets.servo.attach(4);
-  aim(0);
+  servo.attach(4);
+  aim(last_target);
 
   blink(3);
 }
@@ -70,9 +75,9 @@ void handleNoteOn(byte channel, byte note, byte velocity) {
   // velocity is ignored
   switch (note) {
     // C1
-    case 24: launch(launcher24V, 0); break;
+    case 24: launch(launcher36V, 0); break;
     // D1
-    case 26: launch(launcher36V, 0); break;
+    case 26: launch(launcher24V, 0); break;
     // E1
     case 28: launch(launcher24V, 1); break;
   }
