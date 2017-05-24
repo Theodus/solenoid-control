@@ -31,8 +31,9 @@ byte last_target = pivot; // position of solenoid36V
 // [0] [1] [2] [3] [4] [5] [6] [7]
 
 // both solenoids must always be aiming at a target on completion
+// all rotations are based on the position of the 36V launcher
 void aim(byte target) {
-  Serial.println(target);
+  //Serial.println(target);
   byte pos36V = last_target;
   byte pos24V = last_target + launcher24V_offset;
   if (target == pos36V) { launch(launcher36V); }
@@ -61,10 +62,10 @@ void aim_and_launch24V(byte i) {
 
 // rotate launcher36V to target at given index
 void rotate_to(byte i) {
-  Serial.print(i);
+  /*Serial.print(i);
   Serial.print("\t");
   Serial.print(i * angle_between_targets);
-  Serial.println();
+  Serial.println();*/
   servo.write(i * angle_between_targets);
   delay(per_target_delay * abs(i - last_target));
   last_target = i;
@@ -90,9 +91,9 @@ void setup() {
   pinMode(launcher24V.pin, OUTPUT);
   // init targets
   servo.attach(4);
-  aim(last_target);
+  rotate_to(last_target);
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   blink(3);
 }
