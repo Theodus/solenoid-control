@@ -22,10 +22,10 @@ Launcher launcher24V = {
 };
 
 Servo servo;
-const unsigned int per_target_delay = 100; // TODO tweak delay
-const byte angle_between_targets = 13; // TODO verify
-const byte pivot = 3; // TODO tweak pivot based on requirements
-const byte launcher24V_offset = 2; // 3?
+const unsigned int per_target_delay = 180; // TODO tweak delay
+const byte angle_between_targets = 22;
+const byte pivot = 3; // <- // TODO tweak pivot based on requirements
+const byte launcher24V_offset = 2;
 byte last_target = pivot; // position of solenoid36V
 
 // [0] [1] [2] [3] [4] [5] [6] [7]
@@ -38,14 +38,12 @@ void aim(byte target) {
   byte pos24V = last_target + launcher24V_offset;
   if (target == pos36V) { launch(launcher36V); }
   else if (target == pos24V) { launch(launcher24V); } 
+  else if (target < pos36V) { aim_and_launch36V(target); }
+  else if (target > pos24V) { aim_and_launch24V(target); }
   else {
-    if (target < pos36V) { aim_and_launch36V(target); }
-    else if (target > pos24V) { aim_and_launch24V(target); }
-    else {
-      // between the launchers (favor movements toward pivot)
-      if (pos36V >= pivot) { aim_and_launch24V(target); }
-      else { aim_and_launch36V(target); }      
-    }
+    // between the launchers (favor movements toward pivot)
+    if (pos36V >= pivot) { aim_and_launch24V(target); }
+    else { aim_and_launch36V(target); }      
   }
 }
 
@@ -55,7 +53,6 @@ void aim_and_launch36V(byte i) {
 }
 
 void aim_and_launch24V(byte i) {
-  
   rotate_to(i - launcher24V_offset);
   launch(launcher24V);
 }
@@ -102,7 +99,7 @@ void loop() { usbMIDI.read(); } // Do not modify!
 
 void handleNoteOn(byte channel, byte note, byte velocity) {
   digitalWrite(LED_BUILTIN, HIGH);
-  // TODO channel
+  if (channel != 6) { return; }
   // velocity is ignored
   switch (note) {
     case 24: aim(0); break; // C0
