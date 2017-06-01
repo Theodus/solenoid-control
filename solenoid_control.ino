@@ -13,18 +13,18 @@ typedef struct {
 
 Launcher launcher36V = {
   pin: 2,
-  dly: 30 // TODO tweak delay
+  dly: 30
 };
 
 Launcher launcher24V = {
   pin: 3,
-  dly: 30 // TODO tweak delay
+  dly: 30
 };
 
 Servo servo;
-const unsigned int per_target_delay = 180; // TODO tweak delay
+const unsigned int per_target_delay = 100;
 const byte angle_between_targets = 22;
-const byte pivot = 3; // <- // TODO tweak pivot based on requirements
+const byte pivot = 3;
 const byte launcher24V_offset = 2;
 byte last_target = pivot; // position of solenoid36V
 
@@ -54,10 +54,15 @@ void aim_and_launch24V(byte i) {
   launch(launcher24V);
 }
 
-// rotate launcher36V to target at given index
+// rotate launcher36V to target at given index and apply delay
 void rotate_to(byte i) {
   servo.write(i * angle_between_targets);
-  delay(per_target_delay * abs(i - last_target));
+  byte dist = abs(i - last_target);
+  if (dist == 0) {
+    delay(100);
+  } else {
+    delay(per_target_delay * dist);
+  }
   last_target = i;
 }
 
