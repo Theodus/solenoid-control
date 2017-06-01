@@ -87,6 +87,8 @@ void setup() {
   // init targets
   servo.attach(4);
   rotate_to(last_target);
+  launch(launcher36V);
+  launch(launcher24V);
 
   blink(3);
 }
@@ -98,14 +100,14 @@ void handleNoteOn(byte channel, byte note, byte velocity) {
   digitalWrite(LED_BUILTIN, HIGH);
   // velocity is ignored
   switch (note) {
-    case 24: aim_and_launch(0); break; // C0
-    case 26: aim_and_launch(1); break; // D0
-    case 28: aim_and_launch(2); break; // E0
-    case 29: aim_and_launch(3); break; // F0
-    case 31: aim_and_launch(4); break; // G0
-    case 33: aim_and_launch(5); break; // A0
-    case 35: aim_and_launch(6); break; // B0
-    case 36: aim_and_launch(7); break; // C1
+    case 47: aim_and_launch(7); break; // B3
+    case 49: aim_and_launch(6); break; // C#4
+    case 50: aim_and_launch(5); break; // D4
+    case 51: aim_and_launch(4); break; // D#4
+    case 52: aim_and_launch(3); break; // E4
+    case 55: aim_and_launch(2); break; // G4
+    case 57: aim_and_launch(1); break; // A4
+    case 59: aim_and_launch(0); break; // B4
   }
 }
 
