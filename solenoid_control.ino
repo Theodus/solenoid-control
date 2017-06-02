@@ -1,4 +1,4 @@
-#include "Servo.h"
+#include <Servo.h>
 
 /////////////////////////
 // Launchers & Targets //
@@ -22,11 +22,11 @@ Launcher launcher24V = {
 };
 
 Servo servo;
-const unsigned int per_target_delay = 100;
+const unsigned int per_target_delay = 120;
 const byte angle_between_targets = 22;
 const byte pivot = 3;
 const byte launcher24V_offset = 2;
-byte last_target = pivot; // position of solenoid36V
+byte last_target = 2; // position of solenoid36V
 
 // both solenoids must always be aiming at a target on completion
 // all rotations are based on the position of the 36V launcher
@@ -58,11 +58,7 @@ void aim_and_launch24V(byte i) {
 void rotate_to(byte i) {
   servo.write(i * angle_between_targets);
   byte dist = abs(i - last_target);
-  if (dist == 0) {
-    delay(100);
-  } else {
-    delay(per_target_delay * dist);
-  }
+  delay(per_target_delay * dist);
   last_target = i;
 }
 
@@ -87,32 +83,46 @@ void setup() {
   // init targets
   servo.attach(4);
   rotate_to(last_target);
-  launch(launcher36V);
-  launch(launcher24V);
+  //launch(launcher36V);
+  //launch(launcher24V);
 
   blink(3);
 }
 
-void loop() { usbMIDI.read(); } // Do not modify!
+void loop() { usbMIDI.read(6); } // Do not modify!
 
 void handleNoteOn(byte channel, byte note, byte velocity) {
-  if (channel != 6) { return; }
   digitalWrite(LED_BUILTIN, HIGH);
   // velocity is ignored
   switch (note) {
-    case 47: aim_and_launch(7); break; // B3
-    case 49: aim_and_launch(6); break; // C#4
-    case 50: aim_and_launch(5); break; // D4
-    case 51: aim_and_launch(4); break; // D#4
-    case 52: aim_and_launch(3); break; // E4
-    case 55: aim_and_launch(2); break; // G4
-    case 57: aim_and_launch(1); break; // A4
-    case 59: aim_and_launch(0); break; // B4
+    case 47:  // B3
+      aim_and_launch(7);
+      break;
+    case 49: // C#4
+      aim_and_launch(6);
+      break;
+    case 50: // D4
+      aim_and_launch(5);
+      break;
+    case 51: // D#4
+      aim_and_launch(4);
+      break;
+    case 52: // E4
+      aim_and_launch(3);
+      break;
+    case 55: // G4
+      aim_and_launch(2);
+      break;
+    case 57: // A4
+      aim_and_launch(1);
+      break;
+    case 59: // B4
+      aim_and_launch(0);
+      break;
   }
 }
 
 void handleNoteOff(byte channel, byte note, byte velocity) {
-  if (channel != 6) { return; }
   digitalWrite(LED_BUILTIN, LOW);
   // Nothing done
 }
@@ -129,4 +139,4 @@ void blink(byte n) {
     delay(200);
   }
 }
-
+ 
